@@ -1,0 +1,6 @@
+OU=ApexClientandDB,OU=JWS,OU=Workstations,OU=CO,DC=na,DC=vul,DC=com
+
+WCA.*JWS1$
+
+WCA\d{4}[AHP]VJWS1$
+WCA\d{4}.VJWS1$
