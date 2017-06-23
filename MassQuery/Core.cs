@@ -91,6 +91,7 @@ namespace MassQuery
         }
         public static void UpdateMachinesProcessing(string machine, CancellationToken token)
         {
+            //check cancellation token
             if (token.IsCancellationRequested)
             {
                 Core.machinesProcessing = 0;
