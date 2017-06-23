@@ -1,6 +1,10 @@
 # MassQuery
 Query multiple SQL Server databases simultaneously and display the results in a grid. Includes SQL syntax checking, highlighting, and generating lists of machines from Active Directory.
 
+![MassQuery Query Page Screenshot](/MassQuery_Query_Page.png?raw=true)
+
+![MassQuery Machines Page Screenshot](/MassQuery_Machines_Page.png?raw=true)
+
 # Features
 * Layout familiar to SSMS users
 * Syntax Highlighting using [FastColoredTextBox](https://github.com/PavelTorgashov/FastColoredTextBox)
@@ -10,3 +14,6 @@ Query multiple SQL Server databases simultaneously and display the results in a 
 * Import list of machines from a text file
 * Retrieve list of machines from Active directory using LDAP url
 * Filter list of machines with Regex
+* Use the same SQL server credentials across all machines
+* Retrieve SQL server credentials from a connection string with an xml file stored on the machine
+* Connection strings are located using the UNC path to the file and the xpath within the file
