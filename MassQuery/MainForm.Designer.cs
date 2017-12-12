@@ -31,6 +31,8 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.dataGridView = new System.Windows.Forms.DataGridView();
+            this.dataGridContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.saveResultsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.queryBtn = new System.Windows.Forms.Button();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.queryTabPage = new System.Windows.Forms.TabPage();
@@ -44,6 +46,8 @@
             this.machinesListBox = new System.Windows.Forms.ListBox();
             this.filteredMachinesListBox = new System.Windows.Forms.ListBox();
             this.allMachinesLabel = new System.Windows.Forms.Label();
+            this.addMachineButton = new System.Windows.Forms.Button();
+            this.removeMachineButton = new System.Windows.Forms.Button();
             this.credentialSourcePanel = new System.Windows.Forms.Panel();
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.usernameInput = new System.Windows.Forms.TextBox();
@@ -73,9 +77,19 @@
             this.machinesSuccessfulLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.machinesErrorLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.queryAllTimerLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.queryAllTimer = new System.Windows.Forms.Timer(this.components);
+            this.configFileLabel = new System.Windows.Forms.Label();
+            this.configFileTextBox = new System.Windows.Forms.ComboBox();
+            this.loadConfigButton = new System.Windows.Forms.Button();
+            this.saveConfigButton = new System.Windows.Forms.Button();
+            this.loadConfigFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.saveConfigFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.configRepositoryButton = new System.Windows.Forms.Button();
+            this.saveResultsFileDialog = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).BeginInit();
+            this.dataGridContextMenuStrip.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.queryTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
@@ -96,13 +110,28 @@
             this.dataGridView.AllowUserToAddRows = false;
             this.dataGridView.AllowUserToDeleteRows = false;
             this.dataGridView.AllowUserToOrderColumns = true;
-            this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView.ContextMenuStrip = this.dataGridContextMenuStrip;
             this.dataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView.Location = new System.Drawing.Point(0, 0);
             this.dataGridView.Name = "dataGridView";
-            this.dataGridView.Size = new System.Drawing.Size(540, 176);
+            this.dataGridView.RowHeadersVisible = false;
+            this.dataGridView.Size = new System.Drawing.Size(687, 176);
             this.dataGridView.TabIndex = 0;
+            // 
+            // dataGridContextMenuStrip
+            // 
+            this.dataGridContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.saveResultsToolStripMenuItem});
+            this.dataGridContextMenuStrip.Name = "dataGridContextMenuStrip";
+            this.dataGridContextMenuStrip.Size = new System.Drawing.Size(164, 26);
+            // 
+            // saveResultsToolStripMenuItem
+            // 
+            this.saveResultsToolStripMenuItem.Name = "saveResultsToolStripMenuItem";
+            this.saveResultsToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.saveResultsToolStripMenuItem.Text = "Save Results As...";
+            this.saveResultsToolStripMenuItem.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.saveResultsToolStripMenuItem.Click += new System.EventHandler(this.saveResultsToolStripMenuItem_Click);
             // 
             // queryBtn
             // 
@@ -124,7 +153,7 @@
             this.tabControl.Location = new System.Drawing.Point(3, 2);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(551, 420);
+            this.tabControl.Size = new System.Drawing.Size(698, 420);
             this.tabControl.TabIndex = 3;
             // 
             // queryTabPage
@@ -136,7 +165,7 @@
             this.queryTabPage.Location = new System.Drawing.Point(4, 22);
             this.queryTabPage.Name = "queryTabPage";
             this.queryTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.queryTabPage.Size = new System.Drawing.Size(543, 394);
+            this.queryTabPage.Size = new System.Drawing.Size(690, 394);
             this.queryTabPage.TabIndex = 0;
             this.queryTabPage.Text = "Query";
             this.queryTabPage.UseVisualStyleBackColor = true;
@@ -168,7 +197,7 @@
             // splitContainer.Panel2
             // 
             this.splitContainer.Panel2.Controls.Add(this.dataGridView);
-            this.splitContainer.Size = new System.Drawing.Size(540, 359);
+            this.splitContainer.Size = new System.Drawing.Size(687, 359);
             this.splitContainer.SplitterDistance = 179;
             this.splitContainer.TabIndex = 5;
             // 
@@ -204,7 +233,7 @@
             this.queryBox.RightBracket = ')';
             this.queryBox.SelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(255)))));
             this.queryBox.ServiceColors = ((FastColoredTextBoxNS.ServiceColors)(resources.GetObject("queryBox.ServiceColors")));
-            this.queryBox.Size = new System.Drawing.Size(540, 179);
+            this.queryBox.Size = new System.Drawing.Size(687, 179);
             this.queryBox.TabIndex = 3;
             this.queryBox.Zoom = 100;
             this.queryBox.TextChanged += new System.EventHandler<FastColoredTextBoxNS.TextChangedEventArgs>(this.queryBox_TextChanged);
@@ -212,7 +241,7 @@
             // clearResultsBtn
             // 
             this.clearResultsBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.clearResultsBtn.Location = new System.Drawing.Point(462, 6);
+            this.clearResultsBtn.Location = new System.Drawing.Point(609, 6);
             this.clearResultsBtn.Name = "clearResultsBtn";
             this.clearResultsBtn.Size = new System.Drawing.Size(75, 23);
             this.clearResultsBtn.TabIndex = 4;
@@ -230,7 +259,7 @@
             this.machinesTabPage.Location = new System.Drawing.Point(4, 22);
             this.machinesTabPage.Name = "machinesTabPage";
             this.machinesTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.machinesTabPage.Size = new System.Drawing.Size(543, 394);
+            this.machinesTabPage.Size = new System.Drawing.Size(690, 394);
             this.machinesTabPage.TabIndex = 1;
             this.machinesTabPage.Text = "Machines";
             this.machinesTabPage.UseVisualStyleBackColor = true;
@@ -240,18 +269,24 @@
             this.machinesLayoutPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.machinesLayoutPanel.ColumnCount = 2;
+            this.machinesLayoutPanel.ColumnCount = 3;
             this.machinesLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.machinesLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.machinesLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.machinesLayoutPanel.Controls.Add(this.filteredMachinesLabel, 1, 0);
+            this.machinesLayoutPanel.Controls.Add(this.filteredMachinesLabel, 2, 0);
             this.machinesLayoutPanel.Controls.Add(this.machinesListBox, 0, 1);
-            this.machinesLayoutPanel.Controls.Add(this.filteredMachinesListBox, 1, 1);
+            this.machinesLayoutPanel.Controls.Add(this.filteredMachinesListBox, 2, 1);
             this.machinesLayoutPanel.Controls.Add(this.allMachinesLabel, 0, 0);
+            this.machinesLayoutPanel.Controls.Add(this.addMachineButton, 1, 2);
+            this.machinesLayoutPanel.Controls.Add(this.removeMachineButton, 1, 3);
             this.machinesLayoutPanel.Location = new System.Drawing.Point(6, 147);
             this.machinesLayoutPanel.Name = "machinesLayoutPanel";
-            this.machinesLayoutPanel.RowCount = 2;
+            this.machinesLayoutPanel.RowCount = 5;
             this.machinesLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 16F));
-            this.machinesLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.machinesLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.machinesLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.machinesLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.machinesLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.machinesLayoutPanel.Size = new System.Drawing.Size(531, 245);
             this.machinesLayoutPanel.TabIndex = 22;
             // 
@@ -260,9 +295,9 @@
             this.filteredMachinesLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.filteredMachinesLabel.AutoSize = true;
-            this.filteredMachinesLabel.Location = new System.Drawing.Point(268, 0);
+            this.filteredMachinesLabel.Location = new System.Drawing.Point(283, 0);
             this.filteredMachinesLabel.Name = "filteredMachinesLabel";
-            this.filteredMachinesLabel.Size = new System.Drawing.Size(260, 13);
+            this.filteredMachinesLabel.Size = new System.Drawing.Size(245, 13);
             this.filteredMachinesLabel.TabIndex = 23;
             this.filteredMachinesLabel.Text = "Filtered Machines";
             // 
@@ -272,8 +307,9 @@
             this.machinesListBox.FormattingEnabled = true;
             this.machinesListBox.Location = new System.Drawing.Point(3, 19);
             this.machinesListBox.Name = "machinesListBox";
-            this.machinesListBox.SelectionMode = System.Windows.Forms.SelectionMode.None;
-            this.machinesListBox.Size = new System.Drawing.Size(259, 223);
+            this.machinesLayoutPanel.SetRowSpan(this.machinesListBox, 4);
+            this.machinesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.machinesListBox.Size = new System.Drawing.Size(244, 223);
             this.machinesListBox.TabIndex = 5;
             // 
             // filteredMachinesListBox
@@ -281,10 +317,11 @@
             this.filteredMachinesListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.filteredMachinesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.filteredMachinesListBox.FormattingEnabled = true;
-            this.filteredMachinesListBox.Location = new System.Drawing.Point(268, 19);
+            this.filteredMachinesListBox.Location = new System.Drawing.Point(283, 19);
             this.filteredMachinesListBox.Name = "filteredMachinesListBox";
-            this.filteredMachinesListBox.SelectionMode = System.Windows.Forms.SelectionMode.None;
-            this.filteredMachinesListBox.Size = new System.Drawing.Size(260, 223);
+            this.machinesLayoutPanel.SetRowSpan(this.filteredMachinesListBox, 4);
+            this.filteredMachinesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.filteredMachinesListBox.Size = new System.Drawing.Size(245, 223);
             this.filteredMachinesListBox.TabIndex = 21;
             this.filteredMachinesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.filteredMachinesListBox_DrawItem);
             // 
@@ -296,6 +333,28 @@
             this.allMachinesLabel.Size = new System.Drawing.Size(67, 13);
             this.allMachinesLabel.TabIndex = 22;
             this.allMachinesLabel.Text = "All Machines";
+            // 
+            // addMachineButton
+            // 
+            this.addMachineButton.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.addMachineButton.Location = new System.Drawing.Point(253, 76);
+            this.addMachineButton.Name = "addMachineButton";
+            this.addMachineButton.Size = new System.Drawing.Size(24, 51);
+            this.addMachineButton.TabIndex = 24;
+            this.addMachineButton.Text = ">";
+            this.addMachineButton.UseVisualStyleBackColor = true;
+            this.addMachineButton.Click += new System.EventHandler(this.addMachineButton_Click);
+            // 
+            // removeMachineButton
+            // 
+            this.removeMachineButton.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.removeMachineButton.Location = new System.Drawing.Point(253, 133);
+            this.removeMachineButton.Name = "removeMachineButton";
+            this.removeMachineButton.Size = new System.Drawing.Size(24, 51);
+            this.removeMachineButton.TabIndex = 25;
+            this.removeMachineButton.Text = "<";
+            this.removeMachineButton.UseVisualStyleBackColor = true;
+            this.removeMachineButton.Click += new System.EventHandler(this.removeMachineButton_Click);
             // 
             // credentialSourcePanel
             // 
@@ -539,7 +598,7 @@
             // 
             this.machineFilterTextBox.Location = new System.Drawing.Point(87, 122);
             this.machineFilterTextBox.Name = "machineFilterTextBox";
-            this.machineFilterTextBox.Size = new System.Drawing.Size(247, 20);
+            this.machineFilterTextBox.Size = new System.Drawing.Size(447, 20);
             this.machineFilterTextBox.TabIndex = 6;
             this.machineFilterTextBox.TextChanged += new System.EventHandler(this.machineFilterTextBox_TextChanged);
             // 
@@ -569,7 +628,8 @@
             // 
             this.queryStatusLabel.Name = "queryStatusLabel";
             this.queryStatusLabel.Padding = new System.Windows.Forms.Padding(0, 0, 25, 0);
-            this.queryStatusLabel.Size = new System.Drawing.Size(25, 17);
+            this.queryStatusLabel.Size = new System.Drawing.Size(162, 17);
+            this.queryStatusLabel.Spring = true;
             // 
             // queryStatusStrip
             // 
@@ -579,10 +639,11 @@
             this.machinesSuccessfulLabel,
             this.machinesErrorLabel,
             this.queryAllTimerLabel,
-            this.queryStatusLabel});
+            this.queryStatusLabel,
+            this.toolStripProgressBar});
             this.queryStatusStrip.Location = new System.Drawing.Point(0, 425);
             this.queryStatusStrip.Name = "queryStatusStrip";
-            this.queryStatusStrip.Size = new System.Drawing.Size(557, 22);
+            this.queryStatusStrip.Size = new System.Drawing.Size(704, 22);
             this.queryStatusStrip.TabIndex = 4;
             this.queryStatusStrip.Text = "statusStrip1";
             // 
@@ -609,17 +670,90 @@
             this.queryAllTimerLabel.Size = new System.Drawing.Size(105, 17);
             this.queryAllTimerLabel.Text = "Duration: 0:00.00";
             // 
+            // toolStripProgressBar
+            // 
+            this.toolStripProgressBar.Name = "toolStripProgressBar";
+            this.toolStripProgressBar.Size = new System.Drawing.Size(100, 16);
+            this.toolStripProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            // 
             // queryAllTimer
             // 
             this.queryAllTimer.Tick += new System.EventHandler(this.queryAllTimer_Tick);
+            // 
+            // configFileLabel
+            // 
+            this.configFileLabel.AutoSize = true;
+            this.configFileLabel.Location = new System.Drawing.Point(110, 5);
+            this.configFileLabel.Name = "configFileLabel";
+            this.configFileLabel.Size = new System.Drawing.Size(37, 13);
+            this.configFileLabel.TabIndex = 23;
+            this.configFileLabel.Text = "Config";
+            // 
+            // configFileTextBox
+            // 
+            this.configFileTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.configFileTextBox.Location = new System.Drawing.Point(150, 1);
+            this.configFileTextBox.Name = "configFileTextBox";
+            this.configFileTextBox.Size = new System.Drawing.Size(322, 21);
+            this.configFileTextBox.TabIndex = 23;
+            this.configFileTextBox.SelectionChangeCommitted += new System.EventHandler(this.configFileTextBox_SelectionChangeCommitted);
+            // 
+            // loadConfigButton
+            // 
+            this.loadConfigButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.loadConfigButton.Location = new System.Drawing.Point(543, 1);
+            this.loadConfigButton.Name = "loadConfigButton";
+            this.loadConfigButton.Size = new System.Drawing.Size(60, 20);
+            this.loadConfigButton.TabIndex = 23;
+            this.loadConfigButton.Text = "Import";
+            this.loadConfigButton.UseVisualStyleBackColor = true;
+            this.loadConfigButton.Click += new System.EventHandler(this.loadConfigButton_Click);
+            // 
+            // saveConfigButton
+            // 
+            this.saveConfigButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.saveConfigButton.Location = new System.Drawing.Point(479, 1);
+            this.saveConfigButton.Name = "saveConfigButton";
+            this.saveConfigButton.Size = new System.Drawing.Size(60, 20);
+            this.saveConfigButton.TabIndex = 23;
+            this.saveConfigButton.Text = "Save";
+            this.saveConfigButton.UseVisualStyleBackColor = true;
+            this.saveConfigButton.Click += new System.EventHandler(this.saveConfigButton_Click);
+            // 
+            // saveConfigFileDialog
+            // 
+            this.saveConfigFileDialog.Filter = "Config files (*.config)|*.config|All files (*.*)|*.*";
+            // 
+            // configRepositoryButton
+            // 
+            this.configRepositoryButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.configRepositoryButton.Location = new System.Drawing.Point(608, 1);
+            this.configRepositoryButton.Name = "configRepositoryButton";
+            this.configRepositoryButton.Size = new System.Drawing.Size(93, 20);
+            this.configRepositoryButton.TabIndex = 24;
+            this.configRepositoryButton.Text = "Open Repo";
+            this.configRepositoryButton.UseVisualStyleBackColor = true;
+            this.configRepositoryButton.Click += new System.EventHandler(this.configRepositoryButton_Click);
+            // 
+            // saveResultsFileDialog
+            // 
+            this.saveResultsFileDialog.Filter = "CSV (Comma Delimited)|*.csv";
+            this.saveResultsFileDialog.Title = "Save Grid Results";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(557, 447);
+            this.ClientSize = new System.Drawing.Size(704, 447);
+            this.Controls.Add(this.configFileLabel);
+            this.Controls.Add(this.configFileTextBox);
+            this.Controls.Add(this.loadConfigButton);
+            this.Controls.Add(this.saveConfigButton);
+            this.Controls.Add(this.configRepositoryButton);
             this.Controls.Add(this.queryStatusStrip);
             this.Controls.Add(this.tabControl);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.Name = "MainForm";
             this.Text = "Mass Query";
@@ -627,6 +761,7 @@
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).EndInit();
+            this.dataGridContextMenuStrip.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
             this.queryTabPage.ResumeLayout(false);
             this.splitContainer.Panel1.ResumeLayout(false);
@@ -698,6 +833,19 @@
         private System.Windows.Forms.ToolStripStatusLabel machinesErrorLabel;
         private System.Windows.Forms.Timer queryAllTimer;
         private System.Windows.Forms.ToolStripStatusLabel queryAllTimerLabel;
+        private System.Windows.Forms.ComboBox configFileTextBox;
+        private System.Windows.Forms.Label configFileLabel;
+        private System.Windows.Forms.Button loadConfigButton;
+        private System.Windows.Forms.Button saveConfigButton;
+        private System.Windows.Forms.Button addMachineButton;
+        private System.Windows.Forms.Button removeMachineButton;
+        private System.Windows.Forms.OpenFileDialog loadConfigFileDialog;
+        private System.Windows.Forms.SaveFileDialog saveConfigFileDialog;
+        private System.Windows.Forms.Button configRepositoryButton;
+        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar;
+        private System.Windows.Forms.ContextMenuStrip dataGridContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem saveResultsToolStripMenuItem;
+        private System.Windows.Forms.SaveFileDialog saveResultsFileDialog;
     }
 }
 

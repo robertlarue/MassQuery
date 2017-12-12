@@ -189,11 +189,20 @@ namespace MassQuery
                 if (FileExistsTimeout(connectionStringFilePathFull, 5000))
                 {
                     XmlDocument connectionStringFile = new XmlDocument();
-                    connectionStringFile.Load(connectionStringFilePathFull);
-                    XmlNodeList matchingNodes = connectionStringFile.SelectNodes(xpath);
-                    string connectionString = matchingNodes[0].InnerText;
-                    connectionString = Regex.Replace(connectionString, "Provider=.+?;", "");
-                    builder.ConnectionString = connectionString;
+                    try
+                    {
+                        connectionStringFile.Load(connectionStringFilePathFull);
+                        XmlNodeList matchingNodes = connectionStringFile.SelectNodes(xpath);
+                        string connectionString = matchingNodes[0].InnerText;
+                        connectionString = Regex.Replace(connectionString, "Provider=.+?;", "");
+                        builder.ConnectionString = connectionString;
+                    }
+                    catch
+                    {
+                        UpdateMachinesError(hostname);
+                        UpdateMachinesProcessing(hostname, token);
+                        return;
+                    }
                 }
                 else
                 {
@@ -253,6 +262,7 @@ namespace MassQuery
                             Debug.WriteLine("Table successfully merged from " + hostname);
                             UpdateMachinesSuccessful(hostname);
                             adapter.Dispose();
+                            Core.form.UpdateStatus(new Dictionary<string, string> { { "queryStatusLabel", string.Format("{0} rows returned", Core.form.mainTable.Rows.Count) } });
                         }
                         catch (Exception ex)
                         {
@@ -285,6 +295,8 @@ namespace MassQuery
             string directory = (string)obj;
             DirectoryEntry entry = new DirectoryEntry(@"LDAP://" + directory);
             DirectorySearcher mySearcher = new DirectorySearcher(entry);
+            mySearcher.PropertiesToLoad.Clear();
+            mySearcher.PropertiesToLoad.Add("cn");
             mySearcher.Filter = ("(objectClass=computer)");
             mySearcher.SizeLimit = int.MaxValue;
             mySearcher.PageSize = int.MaxValue;
@@ -292,11 +304,16 @@ namespace MassQuery
             {
                 SearchResultCollection results = mySearcher.FindAll();
                 Core.machinesQuerying = results.Count;
+                Core.form.UpdateStatus(new Dictionary<string, string> { { "totalMachinesLabel", "0" } });
                 foreach (SearchResult result in results)
                 {
-                    Thread getComputerNameThread = new Thread(QueryMachines.GetComputerName);
-                    getComputerNameThread.Name = "getComputerNameThread";
-                    getComputerNameThread.Start(result);
+                    string ComputerName = result.Properties["cn"][0].ToString();
+                    Core.form.AddMachine(ComputerName);
+                    Interlocked.Decrement(ref Core.machinesQuerying);
+                    if (Interlocked.Read(ref Core.machinesQuerying) == 0)
+                    {
+                        Core.form.LoadMachines();
+                    }
                 }
             }
             catch
@@ -306,21 +323,25 @@ namespace MassQuery
             mySearcher.Dispose();
             entry.Dispose();
         }
+    }
 
-        public static void GetComputerName(object obj)
+    public static class QueryConfigs
+    {
+        public static void StartQuery(object obj)
         {
-            SearchResult resEnt = (SearchResult)obj;
-            string ComputerName = resEnt.GetDirectoryEntry().Name;
-            if (ComputerName.StartsWith("CN="))
+            string directory = (string)obj;
+            try
             {
-                ComputerName = ComputerName.Remove(0, "CN=".Length).ToUpper();
+                string[] configFiles = Directory.GetFiles(directory, "*.config");
+                foreach(string configFile in configFiles)
+                {
+                    Core.form.configs.Add(Path.GetFileNameWithoutExtension(configFile));
+                }
+                Core.form.AddConfig();
             }
-            Debug.WriteLine(ComputerName);
-            Core.form.machines.Add(ComputerName);
-            Interlocked.Decrement(ref Core.machinesQuerying);
-            if (Interlocked.Read(ref Core.machinesQuerying) == 0)
+            catch
             {
-                Core.form.AddMachine();
+                return;
             }
         }
     }

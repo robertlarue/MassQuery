@@ -109,7 +109,7 @@ namespace MassQuery.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool useMachinesFromOU {
             get {
                 return ((bool)(this["useMachinesFromOU"]));
@@ -121,7 +121,7 @@ namespace MassQuery.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool useSameCredentials {
             get {
                 return ((bool)(this["useSameCredentials"]));
@@ -133,7 +133,7 @@ namespace MassQuery.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool useMachineList {
             get {
                 return ((bool)(this["useMachineList"]));
@@ -145,13 +145,25 @@ namespace MassQuery.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool useConnString {
             get {
                 return ((bool)(this["useConnString"]));
             }
             set {
                 this["useConnString"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string configRepository {
+            get {
+                return ((string)(this["configRepository"]));
+            }
+            set {
+                this["configRepository"] = value;
             }
         }
     }

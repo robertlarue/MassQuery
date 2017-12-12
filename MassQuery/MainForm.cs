@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -18,22 +19,27 @@ using System.Diagnostics;
 using FastColoredTextBoxNS;
 using Microsoft.WindowsAPICodePack.Taskbar;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace MassQuery
 {
     public partial class MainForm : Form
     {
         delegate void ReturnDataCallback();
-        delegate void AddMachineCallback();
+        delegate void LoadMachinesCallback();
+        delegate void AddMachineCallback(string machineName);
+        delegate void AddConfigCallback();
         delegate void UpdateStatusCallback(Dictionary<string,string> status);
 
         public DataTable mainTable = new DataTable();
         public DataTable cachedTable = new DataTable();
+        public BindingList<string> configs = new BindingList<string>();
         public BindingList<string> machines = new BindingList<string>();
         public BindingList<string> filteredMachines = new BindingList<string>();
         public List<string> machinesSuccess = new List<string>();
         public List<string> machinesError = new List<string>();
-
+        public DataGridViewColumn sortColumn = null;
+        public System.Windows.Forms.SortOrder sortOrder = System.Windows.Forms.SortOrder.None;
         public static string machineListPath = "";
 
         public static DateTime queryAllTimerStartTime;
@@ -72,8 +78,50 @@ namespace MassQuery
                 machinesErrorLabel.Text = string.Format("Error: {0}", Interlocked.Read(ref Core.machinesError));
 
                 Debug.WriteLine(string.Format("Refreshing Data Grid View with {0} rows from datatable",mainTable.Rows.Count));
+                if (mainTable.Rows.Count > 0)
+                {
+                    if (sortColumn == null)
+                    {
+                        mainTable.DefaultView.Sort = "Hostname ASC";
+                    }
+                    else
+                    {
+                        if (mainTable.Columns.Contains(sortColumn.Name))
+                        {
+                            string sort = string.Format("[{0}] ", sortColumn.Name);
+                            switch (sortOrder)
+                            {
+                                case System.Windows.Forms.SortOrder.Ascending:
+                                    sort += "ASC";
+                                    break;
+                                case System.Windows.Forms.SortOrder.Descending:
+                                    sort += "DESC";
+                                    break;
+                            }
+                            mainTable.DefaultView.Sort = sort;
+                        }
+                        else
+                        {
+                            mainTable.DefaultView.Sort = "Hostname ASC";
+                        }
+                    }
+                }
+                bool autoSizeColumns = false;
+                if(dataGridView.RowCount == 0)
+                {
+                    autoSizeColumns = true;
+                }
                 this.dataGridView.DataSource = mainTable;
                 this.dataGridView.Refresh();
+                if (autoSizeColumns) {
+                    dataGridView.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+                    foreach (DataGridViewColumn c in dataGridView.Columns)
+                    if (c.Width > dataGridView.Width)
+                    {
+                        c.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                        c.Width = dataGridView.Width;
+                    }
+                }
                 Debug.WriteLine("Data Grid View Refresh Complete");
                 queryAllTimer.Stop();
                 updateQueryAllTimerLabel();
@@ -81,10 +129,11 @@ namespace MassQuery
                 cancelBtn.Enabled = false;
                 TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress, windowHandle);
                 filteredMachinesListBox.Refresh();
+                UpdateStatus(new Dictionary<string, string> { { "queryStatusLabel", string.Format("{0} rows returned", mainTable.Rows.Count) } });
             }
         }
 
-        public void AddMachine()
+        public void AddMachine(string machineName)
         {
             // InvokeRequired required compares the thread ID of the
             // calling thread to the thread ID of the creating thread.
@@ -92,6 +141,29 @@ namespace MassQuery
             if (this.machinesListBox.InvokeRequired)
             {
                 AddMachineCallback d = new AddMachineCallback(AddMachine);
+                try
+                {
+                    this.Invoke(d, new object[] { machineName });
+                }
+                catch
+                {
+                    Application.Exit();
+                }
+            }
+            else
+            {
+                machines.Add(machineName);
+            }
+        }
+
+        public void LoadMachines()
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.machinesListBox.InvokeRequired)
+            {
+                LoadMachinesCallback d = new LoadMachinesCallback(LoadMachines);
                 try
                 {
                     this.Invoke(d, new object[] { });
@@ -103,12 +175,39 @@ namespace MassQuery
             }
             else
             {
+                UpdateStatus(new Dictionary<string, string> { { "queryStatusLabel", "" } });
                 List<string> machinesSorted = machines.ToList();
                 machinesSorted.Sort();
                 machines = new BindingList<string>(machinesSorted);
                 machinesListBox.DataSource = machines;
                 filterMachines();
                 filteredMachinesListBox.DataSource = filteredMachines;
+            }
+        }
+
+        public void AddConfig()
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.configFileTextBox.InvokeRequired)
+            {
+                AddConfigCallback d = new AddConfigCallback(AddConfig);
+                try
+                {
+                    this.Invoke(d, new object[] { });
+                }
+                catch
+                {
+                    Application.Exit();
+                }
+            }
+            else
+            {
+                List<string> configsSorted = configs.ToList();
+                configsSorted.Sort();
+                configs = new BindingList<string>(configsSorted);
+                configFileTextBox.DataSource = configs;
             }
         }
 
@@ -146,7 +245,16 @@ namespace MassQuery
                             TaskbarManager.Instance.SetProgressState((TaskbarProgressBarState)System.Enum.Parse(typeof(TaskbarProgressBarState), status[key]), windowHandle);
                             break;
                         case "taskBarItemProgressValue":
-                            TaskbarManager.Instance.SetProgressValue(int.Parse(status[key]), (int)Core.machinesTotal, windowHandle);
+                            try
+                            {
+                                TaskbarManager.Instance.SetProgressValue(int.Parse(status[key]), (int)Core.machinesTotal, windowHandle);
+                                toolStripProgressBar.Value = int.Parse(status[key]);
+                                toolStripProgressBar.Maximum = (int)Core.machinesTotal;
+                            }
+                            catch
+                            {
+
+                            }
                             break;
                         case "clearQueryBoxErrors":
                             clearQueryBoxErrors();
@@ -172,6 +280,9 @@ namespace MassQuery
                         case "returnMachinesErrorMachinesList":
                             machinesError.Add(status[key]);
                             Debug.WriteLine("Marking " + status[key] + " as error");
+                            break;
+                        case "totalMachinesLabel":
+                            totalMachinesLabel.Text = string.Format("Total Machines: {0}", status[key]);
                             break;
                     }
                 }
@@ -199,16 +310,27 @@ namespace MassQuery
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            Application.EnableVisualStyles();
             windowHandle = this.Handle;
-            dataGridView.DataSource = mainTable;
             toolTip.SetToolTip(queryBtn, "Execute (F5)");
+            LoadConfig();
+            loadConfigFilesFromRepository(Properties.Settings.Default.configRepository);
+        }
 
+        private void LoadConfig()
+        {
+            dataGridView.DataSource = mainTable;
             this.machinesOUtextBox.Text = Properties.Settings.Default.OU;
             this.usernameInput.Text = Properties.Settings.Default.username;
             this.connStringPathInput.Text = Properties.Settings.Default.connStringPath;
             this.connStringXpathInput.Text = Properties.Settings.Default.xpath;
             this.machineFilterTextBox.Text = Properties.Settings.Default.machineFilter;
             machineListPath = Properties.Settings.Default.machineListPath;
+            machinesOURadioBtn.Checked = Properties.Settings.Default.useMachinesFromOU;
+            machinesListRadioBtn.Checked = Properties.Settings.Default.useMachineList;
+            credsRadioBtn.Checked = Properties.Settings.Default.useSameCredentials;
+            connStringRadioBtn.Checked = Properties.Settings.Default.useConnString;
+            queryBox.Text = Properties.Settings.Default.query;
             if (Properties.Settings.Default.useMachineList)
             {
                 fillMachinesListBoxFromFile(machineListPath);
@@ -217,11 +339,6 @@ namespace MassQuery
             {
                 loadMachinesFromActiveDiretory();
             }
-            machinesOURadioBtn.Checked = Properties.Settings.Default.useMachinesFromOU;
-            machinesListRadioBtn.Checked = Properties.Settings.Default.useMachineList;
-            credsRadioBtn.Checked = Properties.Settings.Default.useSameCredentials;
-            connStringRadioBtn.Checked = Properties.Settings.Default.useConnString;
-            queryBox.Text = Properties.Settings.Default.query;
         }
 
         private void queryBtn_Click(object sender, EventArgs e)
@@ -243,7 +360,9 @@ namespace MassQuery
             {
                 return;
             }
-
+            sortColumn = dataGridView.SortedColumn;
+            sortOrder = dataGridView.SortOrder;
+            
             machinesProcessingLabel.Text = string.Format("Processing: {0}", filteredMachines.Count);
             machinesSuccessfulLabel.Text = "Success: 0";
             machinesErrorLabel.Text = "Error: 0";
@@ -257,6 +376,34 @@ namespace MassQuery
             queryAllTimer.Start();
             queryAllTimerStartTime = DateTime.Now;
             cachedTable = mainTable.Copy();
+            if (cachedTable.Rows.Count > 0)
+            {
+                if (sortColumn == null)
+                {
+                    cachedTable.DefaultView.Sort = "Hostname ASC";
+                }
+                else
+                {
+                    if (cachedTable.Columns.Contains(sortColumn.Name))
+                    {
+                        string sort = sortColumn.Name + " ";
+                        switch (sortOrder)
+                        {
+                            case System.Windows.Forms.SortOrder.Ascending:
+                                sort += "ASC";
+                                break;
+                            case System.Windows.Forms.SortOrder.Descending:
+                                sort += "DESC";
+                                break;
+                        }
+                        cachedTable.DefaultView.Sort = sort;
+                    }
+                    else
+                    {
+                        cachedTable.DefaultView.Sort = "Hostname ASC";
+                    }
+                }
+            }
             dataGridView.DataSource = cachedTable;
             mainTable = null;
             mainTable = new DataTable();
@@ -295,17 +442,24 @@ namespace MassQuery
 
         private void loadMachinesFromActiveDiretory()
         {
-            machines = new BindingList<string>();
-            filteredMachines = new BindingList<string>();
-            machinesListBox.DataSource = null;
-            filteredMachinesListBox.DataSource = null;
-            if (machinesOURadioBtn.Checked)
-            {
-                string directory = machinesOUtextBox.Text;
-                Thread queryMachinesThread = new Thread(QueryMachines.StartQuery);
-                queryMachinesThread.Name = "activeDirectorySearchMasterThread";
-                queryMachinesThread.Start(directory);
-            }
+            machinesListBox.SelectedIndex = -1;
+            machines.Clear();
+            filteredMachines.Clear();
+            string directory = machinesOUtextBox.Text;
+            UpdateStatus(new Dictionary<string, string> { { "queryStatusLabel", "Loading machines..." } });
+            Thread queryMachinesThread = new Thread(QueryMachines.StartQuery);
+            queryMachinesThread.Name = "activeDirectorySearchMasterThread";
+            queryMachinesThread.Start(directory);
+        }
+
+        private void loadConfigFilesFromRepository(string directory)
+        {
+            configs = new BindingList<string>();
+            configs.Add("Autosave Config");
+            configFileTextBox.DataSource = null;
+            Thread queryConfigsThread = new Thread(QueryConfigs.StartQuery);
+            queryConfigsThread.Name = "queryConfigsMasterThread";
+            queryConfigsThread.Start(directory);
         }
 
         public void filterMachines()
@@ -379,7 +533,7 @@ namespace MassQuery
             if (result == DialogResult.OK)
             {
                 machineListPath = openFileDialog.FileName;
-                fillMachinesListBoxFromFile(machineListPath);
+                fillMachinesListBoxFromFile(openFileDialog.FileName);
             }
         }
 
@@ -387,7 +541,7 @@ namespace MassQuery
         {
             machinesListTextBox.Text = Path.GetFileName(filePath);
             string[] machineArray = File.ReadAllLines(filePath);
-            machinesListBox.DataSource = null;
+            machinesListBox.SelectedIndex = -1;
             machines.Clear();
             foreach (string machine in machineArray)
             {
@@ -457,6 +611,11 @@ namespace MassQuery
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            SaveConfig();
+        }
+
+        private void SaveConfig()
+        {
             Properties.Settings.Default.OU = this.machinesOUtextBox.Text;
             Properties.Settings.Default.username = this.usernameInput.Text;
             Properties.Settings.Default.connStringPath = this.connStringPathInput.Text;
@@ -470,6 +629,58 @@ namespace MassQuery
             Properties.Settings.Default.useConnString = connStringRadioBtn.Checked;
             Properties.Settings.Default.Save();
         }
+
+        private void ImportConfig()
+        {
+            loadConfigFileDialog.InitialDirectory = Properties.Settings.Default.configRepository;
+            DialogResult result = loadConfigFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                string configFile = loadConfigFileDialog.FileName;
+                string configFileWithoutExtension = Path.GetFileNameWithoutExtension(configFile);
+                string importedConfigFile = IndexedFilename(Path.Combine(Properties.Settings.Default.configRepository, configFileWithoutExtension), "config");
+                string importedConfigFileWithoutExtension = Path.GetFileNameWithoutExtension(configFile);
+
+                File.Copy(configFile, importedConfigFile);
+                Properties.Settings.Default.Load(importedConfigFile);
+                LoadConfig();
+                configs.Add(configFileWithoutExtension);
+                List<string> configsSorted = configs.ToList();
+                configsSorted.Sort();
+                configs = new BindingList<string>(configsSorted);
+                configFileTextBox.SelectedIndex = configFileTextBox.FindStringExact(configFileWithoutExtension);
+            }
+        }
+
+        private string IndexedFilename(string stub, string extension)
+        {
+            int ix = 0;
+            string filename = stub + "." + extension;
+            do
+            {
+                ix++;
+                filename = String.Format("{0}{1}.{2}", stub, ix, extension);
+            } while (File.Exists(filename));
+            return filename;
+        }
+        private void ExportConfig()
+        {
+            SaveConfig();
+            string currentConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+            saveConfigFileDialog.InitialDirectory = Properties.Settings.Default.configRepository;
+            DialogResult result = saveConfigFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                File.Copy(currentConfig, saveConfigFileDialog.FileName, true);
+                string configFileWithoutExtension = Path.GetFileNameWithoutExtension(saveConfigFileDialog.FileName);
+                configs.Add(configFileWithoutExtension);
+                List<string> configsSorted = configs.ToList();
+                configsSorted.Sort();
+                configs = new BindingList<string>(configsSorted);
+                configFileTextBox.SelectedIndex = configFileTextBox.FindStringExact(configFileWithoutExtension);
+            }
+        }
+
 
         private void queryAllTimer_Tick(object sender, EventArgs e)
         {
@@ -514,6 +725,231 @@ namespace MassQuery
             {
                 e.Graphics.DrawString(filteredMachinesListBox.Items[e.Index].ToString(), e.Font, textBrush, e.Bounds.Location);
             }
+        }
+
+        private void loadConfigButton_Click(object sender, EventArgs e)
+        {
+            ImportConfig();
+        }
+
+        private void saveConfigButton_Click(object sender, EventArgs e)
+        {
+
+            ExportConfig();
+        }
+
+        private void configFileTextBox_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            if (configFileTextBox.SelectedIndex != 0)
+            {
+                string configFileWithoutExtension = configFileTextBox.SelectedItem.ToString();
+                string configFilePath = Path.Combine(Properties.Settings.Default.configRepository, configFileWithoutExtension + ".config");
+                Properties.Settings.Default.Load(configFilePath);
+            }
+            else
+            {
+                string currentConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+                Properties.Settings.Default.Load(currentConfig);
+            }
+            LoadConfig();
+        }
+
+        private void configRepositoryButton_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog configRepoDialog = new CommonOpenFileDialog();
+            configRepoDialog.InitialDirectory = Properties.Settings.Default.configRepository;
+            configRepoDialog.IsFolderPicker = true;
+            if (configRepoDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                Properties.Settings.Default.configRepository = configRepoDialog.FileName;
+                loadConfigFilesFromRepository(Properties.Settings.Default.configRepository);
+            }
+        }
+
+        //private void removeMachineButton_Click(object sender, EventArgs e)
+        //{
+        //    string filter = machineFilterTextBox.Text;
+        //    List<string> machinesToRemove = filteredMachinesListBox.SelectedItems.Cast<string>().ToList();
+        //    Match matchMachineList = Regex.Match(filter, @"\^\(\?\!(.*?)\)\.\*(.*)");
+        //    if (matchMachineList.Success)
+        //    {
+        //        string previouslyRemovedMachines = matchMachineList.Groups[1].Value;
+        //        MatchCollection machineMatches = Regex.Matches(previouslyRemovedMachines, @"(\w+)");
+        //        if (machineMatches.Count > 0)
+        //        {
+        //            foreach (Match matchingMachine in machineMatches)
+        //            {
+        //                machinesToRemove.Add(matchingMachine.Groups[1].Value);
+        //            }
+        //        }
+        //        filter = matchMachineList.Groups[2].Value;
+        //    }
+        //    filter = string.Format("^(?!{1}).*{0}", filter, string.Join("|", machinesToRemove.Distinct()));
+        //    machineFilterTextBox.Text = filter;
+        //}
+
+        private void removeMachineButton_Click(object sender, EventArgs e)
+        {
+            string filter = machineFilterTextBox.Text;
+            string barePattern = null;
+            string outputFilter = null;
+            List<string> machinesToAdd = new List<string>();
+            List<string> machinesToRemove = filteredMachinesListBox.SelectedItems.Cast<string>().ToList();
+            Match matchRemList = Regex.Match(filter, @"\(\?\!(.*?)\)\.\*(.*)");
+            if (matchRemList.Success)
+            {
+                string previouslyRemovedMachines = matchRemList.Groups[1].Value;
+                MatchCollection machineMatches = Regex.Matches(previouslyRemovedMachines, @"(\w+)");
+                if (machineMatches.Count > 0)
+                {
+                    foreach (Match matchingMachine in machineMatches)
+                    {
+                        machinesToRemove.Add(matchingMachine.Groups[1].Value);
+                    }
+                }
+                barePattern = matchRemList.Groups[2].Value;
+                //filter = string.Format("^(?!{1}).*(?<add>{0}|{2})", filter, string.Join("|", machinesToRemove.Distinct()), string.Join("|", machinesToAdd.Distinct()));
+            }
+            Match matchAddList = Regex.Match(filter, @"\(\?<add>(.*?)\)");
+            if (matchAddList.Success)
+            {
+                string previouslyAddedMachines = matchAddList.Groups[1].Value;
+                MatchCollection machineMatches = Regex.Matches(previouslyAddedMachines, @"([^|]+)");
+                if (machineMatches.Count > 0)
+                {
+                    foreach (Match matchingMachine in machineMatches)
+                    {
+                        if (!machinesToRemove.Contains(matchingMachine.Groups[1].Value))
+                        {
+                            machinesToAdd.Add(matchingMachine.Groups[1].Value);
+                        }
+                    }
+                }
+
+            }
+            else if(matchRemList.Success)
+            {
+                outputFilter = barePattern;
+            }
+            else
+            {
+                if (filter.Trim() != "")
+                {
+                    outputFilter = filter;
+                }
+                else
+                {
+                    outputFilter = ".*";
+                }
+            }
+
+            if (machinesToAdd.Count > 0)
+            {
+                outputFilter = string.Format("(?<add>{0})", string.Join("|", machinesToAdd.Distinct().OrderBy(m => m)));
+            }
+
+
+            if (machinesToRemove.Count > 0)
+            {
+                outputFilter = string.Format("^(?!{0}).*{1}", string.Join("|", machinesToRemove.Distinct().OrderBy(m => m)), outputFilter);
+            }
+            machineFilterTextBox.Text = outputFilter;
+        }
+
+        private void addMachineButton_Click(object sender, EventArgs e)
+        {
+            string filter = machineFilterTextBox.Text;
+            string barePattern = null;
+            string outputFilter = null;
+            List<string> machinesToAdd = machinesListBox.SelectedItems.Cast<string>().ToList();
+            List<string> machinesToRemove = new List<string>();
+            Match matchRemList = Regex.Match(filter, @"\(\?\!(.*?)\)(.*)");
+            if (matchRemList.Success)
+            {
+                string previouslyRemovedMachines = matchRemList.Groups[1].Value;
+                MatchCollection machineMatches = Regex.Matches(previouslyRemovedMachines, @"(\w+)");
+                if (machineMatches.Count > 0)
+                {
+                    foreach (Match matchingMachine in machineMatches)
+                    {
+                        if (!machinesToAdd.Contains(matchingMachine.Groups[1].Value))
+                        {
+                            machinesToRemove.Add(matchingMachine.Groups[1].Value);
+                        }
+                    }
+                }
+                barePattern = matchRemList.Groups[2].Value;
+                //filter = string.Format("^(?!{1}).*(?<add>{0}|{2})", filter, string.Join("|", machinesToRemove.Distinct()), string.Join("|", machinesToAdd.Distinct()));
+            }
+            Match matchAddList = Regex.Match(filter, @"\(\?<add>(.*?)\)");
+            if (matchAddList.Success)
+            {
+                string previouslyAddedMachines = matchAddList.Groups[1].Value;
+                MatchCollection machineMatches = Regex.Matches(previouslyAddedMachines, @"([^|]+)");
+                if (machineMatches.Count > 0)
+                {
+                    foreach (Match matchingMachine in machineMatches)
+                    {
+                        machinesToAdd.Add(matchingMachine.Groups[1].Value);
+                    }
+                }
+                
+            }
+            else if(matchRemList.Success)
+            {
+                machinesToAdd.Add(barePattern);
+            }
+            else
+            {
+                if (filter.Trim() != "")
+                {
+                    machinesToAdd.Add(filter);
+                }
+                else
+                {
+                    machinesToAdd.Add(".*");
+                }
+            }
+
+            if (machinesToAdd.Count > 0)
+            {
+                outputFilter = string.Format("(?<add>{0})", string.Join("|", machinesToAdd.Distinct().OrderBy(m => m)));
+            }
+
+            if(machinesToRemove.Count > 0)
+            {
+                outputFilter = string.Format("^(?!{0}).*{1}", string.Join("|", machinesToRemove.Distinct().OrderBy(m => m)), outputFilter);
+            }
+            machineFilterTextBox.Text = outputFilter;
+        }
+
+        private void saveResultsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(saveResultsFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                SaveDataGridViewToCSV(saveResultsFileDialog.FileName);
+            }
+        }
+
+        void SaveDataGridViewToCSV(string filename)
+        {
+            // Choose whether to write header. Use EnableWithoutHeaderText instead to omit header.
+            dataGridView.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            // Select all the cells
+            var cellsSelected = dataGridView.SelectedCells;
+            dataGridView.SelectAll();
+            // Copy selected cells to DataObject
+            DataObject dataObject = dataGridView.GetClipboardContent();
+            // Get the text of the DataObject, and serialize it to a file
+            try
+            {
+                File.WriteAllText(filename, dataObject.GetText(TextDataFormat.CommaSeparatedValue));
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            dataGridView.ClearSelection();
         }
     }
 }
