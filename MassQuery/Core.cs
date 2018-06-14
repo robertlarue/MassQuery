@@ -84,8 +84,9 @@ namespace MassQuery
                 }
             }
 
-            catch (Exception)
+            catch (Exception ex)
             {
+                Debug.WriteLine("Error in finding file: " + path + "\r\n" + ex.Message);
                 return false;
             }
         }
@@ -186,7 +187,7 @@ namespace MassQuery
             else if (useConnectionStringFile == "true")
             {
                 string connectionStringFilePathFull = @"\\" + hostname + @"\" + connectionStringFilePath;
-                if (FileExistsTimeout(connectionStringFilePathFull, 5000))
+                if (FileExistsTimeout(connectionStringFilePathFull, 60000))
                 {
                     XmlDocument connectionStringFile = new XmlDocument();
                     try
@@ -319,6 +320,7 @@ namespace MassQuery
             catch
             {
                 Core.machinesQuerying = 0;
+                Core.form.LoadMachines();
             }
             mySearcher.Dispose();
             entry.Dispose();

@@ -34,6 +34,7 @@ namespace MassQuery
         public DataTable mainTable = new DataTable();
         public DataTable cachedTable = new DataTable();
         public BindingList<string> configs = new BindingList<string>();
+        public string currentConfigInDropdown = null;
         public BindingList<string> machines = new BindingList<string>();
         public BindingList<string> filteredMachines = new BindingList<string>();
         public List<string> machinesSuccess = new List<string>();
@@ -206,8 +207,17 @@ namespace MassQuery
             {
                 List<string> configsSorted = configs.ToList();
                 configsSorted.Sort();
+                configsSorted.Insert(0, "Autosave Config");
                 configs = new BindingList<string>(configsSorted);
                 configFileTextBox.DataSource = configs;
+                if (currentConfigInDropdown != null)
+                {
+                    configFileTextBox.SelectedIndex = configFileTextBox.FindStringExact(currentConfigInDropdown);
+                }
+                else
+                {
+                    configFileTextBox.SelectedIndex = 0;
+                }
             }
         }
 
@@ -348,8 +358,11 @@ namespace MassQuery
 
         public void Query(string query)
         {
+            usernameInput.BackColor = SystemColors.Window;
+            passwordInput.BackColor = SystemColors.Window;
+
             //Check if there are any machines
-            if(filteredMachines.Count <= 0)
+            if (filteredMachines.Count <= 0)
             {
                 return;
             }
@@ -358,7 +371,29 @@ namespace MassQuery
             List<string> errors = Parse(query);
             if (errors != null)
             {
-                return;
+                DialogResult response = MessageBox.Show("The SQL query is not valid. Would you like to continue anyways?", "SQL Parse Error", MessageBoxButtons.YesNo);
+                if (response == DialogResult.No)
+                {
+                    return;
+                }
+            }
+
+            if(credsRadioBtn.Checked)
+            {
+                if(passwordInput.Text == "")
+                {
+                    tabControl.SelectedTab = machinesTabPage;
+                    passwordInput.BackColor = Color.Yellow;
+                    passwordInput.Focus();
+                    return;
+                }
+                if (usernameInput.Text == "")
+                {
+                    tabControl.SelectedTab = machinesTabPage;
+                    usernameInput.BackColor = Color.Yellow;
+                    usernameInput.Focus();
+                    return;
+                }
             }
             sortColumn = dataGridView.SortedColumn;
             sortOrder = dataGridView.SortOrder;
@@ -442,20 +477,23 @@ namespace MassQuery
 
         private void loadMachinesFromActiveDiretory()
         {
-            machinesListBox.SelectedIndex = -1;
-            machines.Clear();
-            filteredMachines.Clear();
             string directory = machinesOUtextBox.Text;
-            UpdateStatus(new Dictionary<string, string> { { "queryStatusLabel", "Loading machines..." } });
-            Thread queryMachinesThread = new Thread(QueryMachines.StartQuery);
-            queryMachinesThread.Name = "activeDirectorySearchMasterThread";
-            queryMachinesThread.Start(directory);
+            //if (directory != "")
+            //{
+                machinesListBox.SelectedIndex = -1;
+                machines.Clear();
+                filteredMachines.Clear();
+
+                UpdateStatus(new Dictionary<string, string> { { "queryStatusLabel", "Loading machines..." } });
+                Thread queryMachinesThread = new Thread(QueryMachines.StartQuery);
+                queryMachinesThread.Name = "activeDirectorySearchMasterThread";
+                queryMachinesThread.Start(directory);
+            //}
         }
 
         private void loadConfigFilesFromRepository(string directory)
         {
             configs = new BindingList<string>();
-            configs.Add("Autosave Config");
             configFileTextBox.DataSource = null;
             Thread queryConfigsThread = new Thread(QueryConfigs.StartQuery);
             queryConfigsThread.Name = "queryConfigsMasterThread";
@@ -540,15 +578,18 @@ namespace MassQuery
         private void fillMachinesListBoxFromFile(string filePath)
         {
             machinesListTextBox.Text = Path.GetFileName(filePath);
-            string[] machineArray = File.ReadAllLines(filePath);
-            machinesListBox.SelectedIndex = -1;
-            machines.Clear();
-            foreach (string machine in machineArray)
+            if (File.Exists(filePath))
             {
-                machines.Add(machine);
+                string[] machineArray = File.ReadAllLines(filePath);
+                machinesListBox.SelectedIndex = -1;
+                machines.Clear();
+                foreach (string machine in machineArray)
+                {
+                    machines.Add(machine);
+                }
+                machinesListBox.DataSource = machines;
+                filterMachines();
             }
-            machinesListBox.DataSource = machines;
-            filterMachines();
         }
 
         private void clearResultsBtn_Click(object sender, EventArgs e)
@@ -644,7 +685,7 @@ namespace MassQuery
                 File.Copy(configFile, importedConfigFile);
                 Properties.Settings.Default.Load(importedConfigFile);
                 LoadConfig();
-                configs.Add(configFileWithoutExtension);
+                configs.Add(importedConfigFileWithoutExtension);
                 List<string> configsSorted = configs.ToList();
                 configsSorted.Sort();
                 configs = new BindingList<string>(configsSorted);
@@ -667,17 +708,23 @@ namespace MassQuery
         {
             SaveConfig();
             string currentConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+            saveConfigFileDialog.FileName = null;
             saveConfigFileDialog.InitialDirectory = Properties.Settings.Default.configRepository;
             DialogResult result = saveConfigFileDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
                 File.Copy(currentConfig, saveConfigFileDialog.FileName, true);
+                loadConfigFilesFromRepository(Properties.Settings.Default.configRepository);
+
                 string configFileWithoutExtension = Path.GetFileNameWithoutExtension(saveConfigFileDialog.FileName);
-                configs.Add(configFileWithoutExtension);
-                List<string> configsSorted = configs.ToList();
-                configsSorted.Sort();
-                configs = new BindingList<string>(configsSorted);
-                configFileTextBox.SelectedIndex = configFileTextBox.FindStringExact(configFileWithoutExtension);
+                currentConfigInDropdown = configFileWithoutExtension;
+                //if (!configs.Contains(configFileWithoutExtension))
+                //{
+                //    configs.Add(configFileWithoutExtension);
+                //}
+                //List<string> configsSorted = configs.ToList();
+                //configsSorted.OrderBy(s => s);
+                //configs = new BindingList<string>(configsSorted);
             }
         }
 
@@ -743,12 +790,14 @@ namespace MassQuery
             if (configFileTextBox.SelectedIndex != 0)
             {
                 string configFileWithoutExtension = configFileTextBox.SelectedItem.ToString();
+                currentConfigInDropdown = configFileWithoutExtension;
                 string configFilePath = Path.Combine(Properties.Settings.Default.configRepository, configFileWithoutExtension + ".config");
                 Properties.Settings.Default.Load(configFilePath);
             }
             else
             {
                 string currentConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+                currentConfig = null;
                 Properties.Settings.Default.Load(currentConfig);
             }
             LoadConfig();

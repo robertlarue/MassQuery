@@ -287,7 +287,7 @@
             this.machinesLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.machinesLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.machinesLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.machinesLayoutPanel.Size = new System.Drawing.Size(531, 245);
+            this.machinesLayoutPanel.Size = new System.Drawing.Size(678, 245);
             this.machinesLayoutPanel.TabIndex = 22;
             // 
             // filteredMachinesLabel
@@ -295,11 +295,11 @@
             this.filteredMachinesLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.filteredMachinesLabel.AutoSize = true;
-            this.filteredMachinesLabel.Location = new System.Drawing.Point(283, 0);
+            this.filteredMachinesLabel.Location = new System.Drawing.Point(357, 0);
             this.filteredMachinesLabel.Name = "filteredMachinesLabel";
-            this.filteredMachinesLabel.Size = new System.Drawing.Size(245, 13);
+            this.filteredMachinesLabel.Size = new System.Drawing.Size(318, 13);
             this.filteredMachinesLabel.TabIndex = 23;
-            this.filteredMachinesLabel.Text = "Filtered Machines";
+            this.filteredMachinesLabel.Text = "Filtered Machines   (Green: Success, Red: Error)";
             // 
             // machinesListBox
             // 
@@ -309,7 +309,7 @@
             this.machinesListBox.Name = "machinesListBox";
             this.machinesLayoutPanel.SetRowSpan(this.machinesListBox, 4);
             this.machinesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.machinesListBox.Size = new System.Drawing.Size(244, 223);
+            this.machinesListBox.Size = new System.Drawing.Size(318, 223);
             this.machinesListBox.TabIndex = 5;
             // 
             // filteredMachinesListBox
@@ -317,11 +317,11 @@
             this.filteredMachinesListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.filteredMachinesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.filteredMachinesListBox.FormattingEnabled = true;
-            this.filteredMachinesListBox.Location = new System.Drawing.Point(283, 19);
+            this.filteredMachinesListBox.Location = new System.Drawing.Point(357, 19);
             this.filteredMachinesListBox.Name = "filteredMachinesListBox";
             this.machinesLayoutPanel.SetRowSpan(this.filteredMachinesListBox, 4);
             this.filteredMachinesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.filteredMachinesListBox.Size = new System.Drawing.Size(245, 223);
+            this.filteredMachinesListBox.Size = new System.Drawing.Size(318, 223);
             this.filteredMachinesListBox.TabIndex = 21;
             this.filteredMachinesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.filteredMachinesListBox_DrawItem);
             // 
@@ -337,7 +337,7 @@
             // addMachineButton
             // 
             this.addMachineButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.addMachineButton.Location = new System.Drawing.Point(253, 76);
+            this.addMachineButton.Location = new System.Drawing.Point(327, 76);
             this.addMachineButton.Name = "addMachineButton";
             this.addMachineButton.Size = new System.Drawing.Size(24, 51);
             this.addMachineButton.TabIndex = 24;
@@ -348,7 +348,7 @@
             // removeMachineButton
             // 
             this.removeMachineButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.removeMachineButton.Location = new System.Drawing.Point(253, 133);
+            this.removeMachineButton.Location = new System.Drawing.Point(327, 133);
             this.removeMachineButton.Name = "removeMachineButton";
             this.removeMachineButton.Size = new System.Drawing.Size(24, 51);
             this.removeMachineButton.TabIndex = 25;
@@ -365,7 +365,7 @@
             this.credentialSourcePanel.Controls.Add(this.connStringRadioBtn);
             this.credentialSourcePanel.Location = new System.Drawing.Point(6, 62);
             this.credentialSourcePanel.Name = "credentialSourcePanel";
-            this.credentialSourcePanel.Size = new System.Drawing.Size(531, 54);
+            this.credentialSourcePanel.Size = new System.Drawing.Size(678, 54);
             this.credentialSourcePanel.TabIndex = 20;
             // 
             // tableLayoutPanel
@@ -390,7 +390,7 @@
             this.tableLayoutPanel.RowCount = 2;
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel.Size = new System.Drawing.Size(418, 45);
+            this.tableLayoutPanel.Size = new System.Drawing.Size(565, 45);
             this.tableLayoutPanel.TabIndex = 19;
             // 
             // usernameInput
@@ -400,7 +400,7 @@
             this.usernameInput.Enabled = false;
             this.usernameInput.Location = new System.Drawing.Point(68, 3);
             this.usernameInput.Name = "usernameInput";
-            this.usernameInput.Size = new System.Drawing.Size(140, 20);
+            this.usernameInput.Size = new System.Drawing.Size(214, 20);
             this.usernameInput.TabIndex = 11;
             // 
             // connStringPathLabel
@@ -421,16 +421,16 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.connStringPathInput.Location = new System.Drawing.Point(68, 25);
             this.connStringPathInput.Name = "connStringPathInput";
-            this.connStringPathInput.Size = new System.Drawing.Size(140, 20);
+            this.connStringPathInput.Size = new System.Drawing.Size(214, 20);
             this.connStringPathInput.TabIndex = 12;
             // 
             // connStringXpathInput
             // 
             this.connStringXpathInput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.connStringXpathInput.Location = new System.Drawing.Point(274, 25);
+            this.connStringXpathInput.Location = new System.Drawing.Point(348, 25);
             this.connStringXpathInput.Name = "connStringXpathInput";
-            this.connStringXpathInput.Size = new System.Drawing.Size(141, 20);
+            this.connStringXpathInput.Size = new System.Drawing.Size(214, 20);
             this.connStringXpathInput.TabIndex = 16;
             // 
             // connStringXpathLabel
@@ -438,7 +438,7 @@
             this.connStringXpathLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.connStringXpathLabel.AutoSize = true;
-            this.connStringXpathLabel.Location = new System.Drawing.Point(214, 22);
+            this.connStringXpathLabel.Location = new System.Drawing.Point(288, 22);
             this.connStringXpathLabel.Name = "connStringXpathLabel";
             this.connStringXpathLabel.Size = new System.Drawing.Size(36, 23);
             this.connStringXpathLabel.TabIndex = 18;
@@ -450,9 +450,9 @@
             this.passwordInput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.passwordInput.Enabled = false;
-            this.passwordInput.Location = new System.Drawing.Point(274, 3);
+            this.passwordInput.Location = new System.Drawing.Point(348, 3);
             this.passwordInput.Name = "passwordInput";
-            this.passwordInput.Size = new System.Drawing.Size(141, 20);
+            this.passwordInput.Size = new System.Drawing.Size(214, 20);
             this.passwordInput.TabIndex = 13;
             // 
             // usernameLabel
@@ -474,7 +474,7 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.passwordLabel.AutoSize = true;
             this.passwordLabel.Enabled = false;
-            this.passwordLabel.Location = new System.Drawing.Point(214, 0);
+            this.passwordLabel.Location = new System.Drawing.Point(288, 0);
             this.passwordLabel.Name = "passwordLabel";
             this.passwordLabel.Size = new System.Drawing.Size(53, 22);
             this.passwordLabel.TabIndex = 15;
@@ -516,7 +516,7 @@
             this.machineSourcePanel.Controls.Add(this.loadMachinesBtn);
             this.machineSourcePanel.Location = new System.Drawing.Point(6, 6);
             this.machineSourcePanel.Name = "machineSourcePanel";
-            this.machineSourcePanel.Size = new System.Drawing.Size(531, 54);
+            this.machineSourcePanel.Size = new System.Drawing.Size(678, 54);
             this.machineSourcePanel.TabIndex = 19;
             // 
             // machinesOURadioBtn
@@ -548,7 +548,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.machinesOUtextBox.Location = new System.Drawing.Point(126, 4);
             this.machinesOUtextBox.Name = "machinesOUtextBox";
-            this.machinesOUtextBox.Size = new System.Drawing.Size(227, 20);
+            this.machinesOUtextBox.Size = new System.Drawing.Size(374, 20);
             this.machinesOUtextBox.TabIndex = 2;
             // 
             // machinesListTextBox
@@ -559,14 +559,14 @@
             this.machinesListTextBox.Location = new System.Drawing.Point(125, 30);
             this.machinesListTextBox.Name = "machinesListTextBox";
             this.machinesListTextBox.ReadOnly = true;
-            this.machinesListTextBox.Size = new System.Drawing.Size(227, 20);
+            this.machinesListTextBox.Size = new System.Drawing.Size(374, 20);
             this.machinesListTextBox.TabIndex = 3;
             // 
             // openMachineListBtn
             // 
             this.openMachineListBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.openMachineListBtn.Enabled = false;
-            this.openMachineListBtn.Location = new System.Drawing.Point(358, 28);
+            this.openMachineListBtn.Location = new System.Drawing.Point(505, 28);
             this.openMachineListBtn.Name = "openMachineListBtn";
             this.openMachineListBtn.Size = new System.Drawing.Size(170, 23);
             this.openMachineListBtn.TabIndex = 8;
@@ -577,7 +577,7 @@
             // loadMachinesBtn
             // 
             this.loadMachinesBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.loadMachinesBtn.Location = new System.Drawing.Point(359, 4);
+            this.loadMachinesBtn.Location = new System.Drawing.Point(506, 4);
             this.loadMachinesBtn.Name = "loadMachinesBtn";
             this.loadMachinesBtn.Size = new System.Drawing.Size(169, 23);
             this.loadMachinesBtn.TabIndex = 4;
@@ -598,7 +598,7 @@
             // 
             this.machineFilterTextBox.Location = new System.Drawing.Point(87, 122);
             this.machineFilterTextBox.Name = "machineFilterTextBox";
-            this.machineFilterTextBox.Size = new System.Drawing.Size(447, 20);
+            this.machineFilterTextBox.Size = new System.Drawing.Size(597, 20);
             this.machineFilterTextBox.TabIndex = 6;
             this.machineFilterTextBox.TextChanged += new System.EventHandler(this.machineFilterTextBox_TextChanged);
             // 
